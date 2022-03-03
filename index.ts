@@ -78,12 +78,11 @@ async function main() {
     types: {
       PalletDappsStakingEraStakingPoints: {
         total: "Balance",
-        stakers: "BTreeMap<AccountId, u128>",
+        stakers: "BTreeMap<AccountId, Balance>",
         claimedRewards: "Balance",
       },
     },
   });
-  // );
   api.on("error", (error: Error) => console.error(error.message));
   try {
     await api.isReadyOrError;
