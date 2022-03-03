@@ -1,7 +1,7 @@
-import { ApiPromise, WsProvider } from '@polkadot/api';
-import { options } from '@astar-network/astar-api';
-import { BTreeMap, Option, Struct } from '@polkadot/types';
-import { AccountId, Balance, EraIndex } from '@polkadot/types/interfaces';
+import { ApiPromise, WsProvider } from "@polkadot/api";
+import { options } from "@astar-network/astar-api";
+import { BTreeMap, Option, Struct } from "@polkadot/types";
+import { AccountId, Balance, EraIndex } from "@polkadot/types/interfaces";
 
 interface PalletDapsStakingEraStakingPoints extends Struct {
   readonly total: Balance;
@@ -49,7 +49,9 @@ const getLatestStakePoint = async (
   api: ApiPromise,
   contract: string
 ): Promise<PalletDapsStakingEraStakingPoints | undefined> => {
-  const currentEra = await (await api.query.dappsStaking.currentEra<EraIndex>()).toNumber();
+  const currentEra = await (
+    await api.query.dappsStaking.currentEra<EraIndex>()
+  ).toNumber();
   const contractAddress = getAddressEnum(contract);
   // iterate from currentEra backwards until you find record for ContractEraStake
   for (let era = currentEra; era > 0; era -= 1) {
@@ -69,22 +71,20 @@ const getLatestStakePoint = async (
 
 async function main() {
   // const endpoint = 'wss://shiden.api.onfinality.io/public-ws';
-  const endpoint = 'wss://rpc.shiden.astar.network';
+  const endpoint = "wss://rpc.shiden.astar.network";
   const provider = new WsProvider(endpoint);
-  const api = new ApiPromise(
-    options({
-      provider,
-      // types: {
-      //   PalletDappsStakingEraStakingPoints: {
-      //     total: 'Balance',
-      //     stakers: 'BTreeMap<AccountId, Balance>',
-      //     former_staked_era: 'EraIndex',
-      //     claimedRewards: 'Balance',
-      //   },
-      // },
-    })
-  );
-  api.on('error', (error: Error) => console.error(error.message));
+  const api = new ApiPromise({
+    provider,
+    types: {
+      PalletDappsStakingEraStakingPoints: {
+        total: "Balance",
+        stakers: "BTreeMap<AccountId, u128>",
+        claimedRewards: "Balance",
+      },
+    },
+  });
+  // );
+  api.on("error", (error: Error) => console.error(error.message));
   try {
     await api.isReadyOrError;
   } catch (e) {
@@ -97,10 +97,11 @@ async function main() {
   // const contractAddress = '0xae4fe19acd45e405c4cfbea281c7a3af20a10849';
   // const contractAddress = '0xad9659fD787e70222Cf190Cf2467d54b580271F7';
   // const contractAddress = '0xa5efb5bf75bbb607dc243707a83f2af5ed4e9813';
-  const contractAddress = '0x072416b9df2382a62Df34956DffB7B0aDdf668F9';
+  const contractAddress = "0x072416b9df2382a62Df34956DffB7B0aDdf668F9";
   await getLatestStakePoint(api, contractAddress);
   // const staking = await getEraStakes(api, contractAddress);
   // console.log({ staking });
   await api.disconnect();
+  console.log("success");
 }
 main();
